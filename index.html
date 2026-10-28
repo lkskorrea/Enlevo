@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Família</title>
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-light: #a2d2ff;
+      --secondary: #ffafcc;
+      --accent: #2e9e5b;
+      --accent-light: #b9fbc0;
+      --bg-color: #fafbfd;
+      --text-dark: #2d3748;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --danger: #e53e3e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ecrã de Login */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(135deg, #eaf4f4 0%, #fde2e4 50%, #e2ece9 100%);
+    }
+    .login-card {
+      background: var(--card-bg);
+      padding: 36px 28px;
+      border-radius: 28px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      width: 100%;
+      max-width: 380px;
+    }
+    .login-card h2 { margin: 10px 0 6px 0; color: var(--text-dark); }
+    .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 18px; }
+
+    .emoji-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin: 12px 0;
+    }
+    .emoji-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      background: #f1f5f9;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .emoji-btn.selected {
+      border-color: var(--primary);
+      background: #e1f0ff;
+      transform: scale(1.08);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      margin: 6px 0;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 15px;
+      outline: none;
+      background: #f8fafc;
+      color: var(--text-dark);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    button.btn-primary {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 14px;
+      border: none;
+      background-color: var(--primary);
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(74, 144, 226, 0.35);
+      transition: opacity 0.2s;
+    }
+    button.btn-google {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      background-color: #fff;
+      color: var(--text-dark);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .apk-banner {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+    .apk-banner a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Aplicação Principal */
+    #main-app {
+      display: none;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #e1f0ff;
+      padding: 16px 20px;
+      border-radius: 22px;
+      margin-bottom: 22px;
+    }
+    .greeting { font-size: 1.35em; font-weight: 700; color: var(--text-dark); }
+    .greeting span { color: var(--primary); }
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #d8f8df;
+      color: #0a331b;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-icon {
+      border: none;
+      background: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Grelha de Menus */
+    .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .menu-card {
+      background: var(--card-bg);
+      padding: 22px 14px;
+      border-radius: 22px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.03);
+      transition: transform 0.15s ease;
+    }
+    .menu-card:active { transform: scale(0.98); }
+    .menu-card .icon { font-size: 32px; margin-bottom: 8px; }
+    .menu-card .title { font-weight: 700; font-size: 15px; }
+    .menu-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .c-cal { background-color: #eaf4f4; }
+    .c-chat { background-color: #f8edeb; }
+    .c-meta { background-color: #e2ece9; }
+    .c-comp { background-color: #fff1e6; }
+    .c-aniv { background-color: #fde2e4; }
+    .c-tel { background-color: #e2eafc; }
+    .c-fot { background-color: #ffecd1; }
+    .c-doc { background-color: #e8e8e4; }
+
+    /* Elementos de Lista */
+    .list-item {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .list-item-content { flex: 1; }
+    .list-item-content h4 { margin: 0 0 4px 0; font-size: 16px; }
+    .list-item-content p { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+    .item-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-small {
+      border: none;
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-wa { background: #25D366; color: white; }
+    .btn-edit { background: #e1f0ff; color: var(--primary); }
+    .btn-del { background: #fee2e2; color: var(--danger); }
+    .btn-save-val { background: #d8f8df; color: #0a331b; }
+
+    /* Calendário */
+    .cal-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .cal-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .cal-day {
+      background: white;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      position: relative;
+      border: 2px solid transparent;
+    }
+    .cal-day.selected {
+      border-color: var(--primary);
+      background: #e1f0ff;
+    }
+    .cal-day.has-event::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #d55b88;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 5px;
+    }
+
+    /* Metas */
+    .progress-container {
+      width: 100%;
+      background-color: #edf2f7;
+      border-radius: 10px;
+      height: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: var(--accent);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    /* Menu Flutuante */
+    .pill-nav {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      padding: 8px 18px;
+      border-radius: 50px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+      display: flex;
+      gap: 14px;
+      z-index: 1000;
+    }
+    .nav-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: all 0.25s ease;
+    }
+    .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+    }
+
+    .form-group {
+      background: white;
+      padding: 16px;
+      border-radius: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .section-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-top h3 { margin: 0; }
+    .btn-back {
+      border: none;
+      background: #e2e8f0;
+      padding: 7px 13px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Galeria Fotos */
+    .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .foto-card {
+      background: white;
+      padding: 8px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .foto-card img {
+      width: 100%;
+      border-radius: 10px;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+    .foto-card p {
+      font-size: 12px;
+      margin: 6px 0 0 0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ECRÃ DE LOGIN E PERFIL FAMILIAR -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div style="font-size: 42px;">🏠❤️</div>
+      <h2>App Família</h2>
+      <p>Escolha o seu ícone e diga como quer ser chamado(a) na família:</p>
+
+      <div class="emoji-picker" id="emoji-picker">
+        <button type="button" class="emoji-btn selected" onclick="selecionarEmoji('👩', this)">👩</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('👨', this)">👨</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('👧', this)">👧</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('👦', this)">👦</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('👵', this)">👵</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('👴', this)">👴</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('❤️', this)">❤️</button>
+        <button type="button" class="emoji-btn" onclick="selecionarEmoji('🌟', this)">🌟</button>
+      </div>
+
+      <input type="text" id="username-input" placeholder="Seu nome ou apelido (ex: Mãe, Pai, Lucas)" autocomplete="off">
+      <button class="btn-primary" onclick="entrar()">Entrar no Espaço da Família</button>
+      <button class="btn-google" onclick="entrarComGoogle()">🔐 Autenticar com Conta Google</button>
+
+      <div class="apk-banner">
+        📱 Usando no celular Android? <br>
+        <a href="./APK_FINAL/app-debug.apk" download="AppFamilia.apk">Baixar Aplicativo Android (.APK)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICAÇÃO PRINCIPAL -->
+  <div id="main-app">
+    <div class="header">
+      <div>
+        <div class="greeting" id="greeting-text">Olá, <span>Família</span>!</div>
+        <div class="status-badge" id="sync-status">🔄 A conectar ao banco...</div>
+      </div>
+      <div class="header-actions">
+        <a href="./APK_FINAL/app-debug.apk" download="AppFamilia.apk" class="btn-icon" title="Baixar APK Android" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">📲</a>
+        <button class="btn-icon" onclick="trocarPerfil()" title="Trocar Perfil">👤</button>
+      </div>
+    </div>
+
+    <!-- Home -->
+    <div id="screen-home" class="screen active">
+      <div class="grid-menu">
+        <div class="menu-card c-cal" onclick="abrirEcra('calendario')">
+          <div class="icon">📅</div>
+          <div class="title">Calendário</div>
+          <div class="sub">Eventos do mês</div>
+        </div>
+        <div class="menu-card c-chat" onclick="abrirEcra('mensagens')">
+          <div class="icon">💬</div>
+          <div class="title">Mensagens</div>
+          <div class="sub">Mural e chat</div>
+        </div>
+        <div class="menu-card c-meta" onclick="abrirEcra('metas')">
+          <div class="icon">🎯</div>
+          <div class="title">Metas</div>
+          <div class="sub">Objetivos e saldo</div>
+        </div>
+        <div class="menu-card c-comp" onclick="abrirEcra('compras')">
+          <div class="icon">🛒</div>
+          <div class="title">Compras</div>
+          <div class="sub">Lista de mercado</div>
+        </div>
+        <div class="menu-card c-aniv" onclick="abrirEcra('aniversarios')">
+          <div class="icon">🎂</div>
+          <div class="title">Aniversários</div>
+          <div class="sub">Datas especiais</div>
+        </div>
+        <div class="menu-card c-tel" onclick="abrirEcra('telefones')">
+          <div class="icon">📞</div>
+          <div class="title">Telefones</div>
+          <div class="sub">WhatsApp e chamadas</div>
+        </div>
+        <div class="menu-card c-fot" onclick="abrirEcra('fotos')">
+          <div class="icon">🖼️</div>
+          <div class="title">Fotos</div>
+          <div class="sub">Álbum da família</div>
+        </div>
+        <div class="menu-card c-doc" onclick="abrirEcra('documentos')">
+          <div class="icon">📄</div>
+          <div class="title">Documentos</div>
+          <div class="sub">Arquivos e notas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendário -->
+    <div id="screen-calendario" class="screen">
+      <div class="section-top">
+        <h3>📅 O Nosso Mês</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <div class="cal-nav">
+          <button class="btn-small btn-edit" onclick="mudarMes(-1)">◀ Anterior</button>
+          <strong id="cal-month-label">Mês</strong>
+          <button class="btn-small btn-edit" onclick="mudarMes(1)">Próximo ▶</button>
+        </div>
+        <div class="calendar-grid cal-header">
+          <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+        </div>
+        <div id="calendar-body" class="calendar-grid"></div>
+      </div>
+      <div class="form-group">
+        <h4 id="cal-selected-label" style="margin:0 0 8px 0;">Adicionar evento</h4>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="cal-desc-input" placeholder="Descrição do compromisso...">
+          <button class="btn-primary" style="width:auto; margin-top:6px; padding:0 18px;" onclick="salvarEventoCalendario()">+</button>
+        </div>
+      </div>
+      <div id="calendar-events"></div>
+    </div>
+
+    <!-- Metas -->
+    <div id="screen-metas" class="screen">
+      <div class="section-top">
+        <h3>🎯 Metas da Família</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="meta-icone" placeholder="🏖️" value="🏖️" style="width:70px; text-align:center;">
+          <input type="text" id="meta-nome" placeholder="Nome da Meta (ex: Férias)">
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="meta-total" placeholder="Valor Total (R$)">
+          <input type="number" id="meta-guardado" placeholder="Já Guardado (R$)">
+        </div>
+        <button class="btn-primary" onclick="salvarMeta()">Adicionar Meta</button>
+      </div>
+      <div id="lista-metas"></div>
+    </div>
+
+    <!-- Telefones -->
+    <div id="screen-telefones" class="screen">
+      <div class="section-top">
+        <h3>📞 Telefones Úteis</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="tel-nome" placeholder="Nome do Contacto (ex: Pediatra, Vó Maria)">
+        <input type="tel" id="tel-numero" placeholder="Número com DDD (ex: 5521999999999)">
+        <button class="btn-primary" onclick="salvarTelefone()">Adicionar Contacto</button>
+      </div>
+      <div id="lista-telefones"></div>
+    </div>
+
+    <!-- Aniversários -->
+    <div id="screen-aniversarios" class="screen">
+      <div class="section-top">
+        <h3>🎂 Aniversários</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="aniv-nome" placeholder="Nome do aniversariante">
+        <div style="display:flex; gap:8px;">
+          <select id="aniv-dia" style="width:35%;"></select>
+          <select id="aniv-mes" style="width:65%;">
+            <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option>
+            <option value="Março">Março</option><option value="Abril">Abril</option>
+            <option value="Maio">Maio</option><option value="Junho">Junho</option>
+            <option value="Julho">Julho</option><option value="Agosto">Agosto</option>
+            <option value="Setembro">Setembro</option><option value="Outubro">Outubro</option>
+            <option value="Novembro">Novembro</option><option value="Dezembro">Dezembro</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="salvarAniversario()">Adicionar Aniversário</button>
+      </div>
+      <div id="lista-aniversarios"></div>
+    </div>
+
+    <!-- Compras -->
+    <div id="screen-compras" class="screen">
+      <div class="section-top">
+        <h3>🛒 Lista de Compras</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="compra-nome" placeholder="Ex: Pão, Leite, Arroz">
+          <input type="text" id="compra-qtd" placeholder="Qtd / Obs" style="width:40%;">
+        </div>
+        <button class="btn-primary" onclick="salvarCompra()">Adicionar à Lista</button>
+      </div>
+      <div id="lista-compras"></div>
+    </div>
+
+    <!-- Mensagens -->
+    <div id="screen-mensagens" class="screen">
+      <div class="section-top">
+        <h3>💬 Mural / Chat</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div id="lista-mensagens" class="form-group" style="height: 52vh; overflow-y: auto; margin-bottom: 12px;"></div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="msg-texto" placeholder="Escreva uma mensagem para a família..." onkeydown="if(event.key==='Enter') salvarMensagem()">
+        <button class="btn-primary" style="width:auto; margin-top:6px; padding: 0 22px;" onclick="salvarMensagem()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Fotos -->
+    <div id="screen-fotos" class="screen">
+      <div class="section-top">
+        <h3>🖼️ Álbuns de Fotos</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <input type="file" id="foto-file" accept="image/*" style="padding: 10px; background: white;">
+        <input type="text" id="foto-legenda" placeholder="Legenda ou Álbum da foto">
+        <button class="btn-primary" id="btn-foto" onclick="salvarFoto()">Carregar Foto</button>
+        <p id="foto-status" style="font-size: 12px; color: var(--text-muted); text-align: center; display: none;">A comprimir e guardar foto...</p>
+      </div>
+      <div id="lista-fotos" class="galeria-grid"></div>
+    </div>
+
+    <!-- Documentos -->
+    <div id="screen-documentos" class="screen">
+      <div class="section-top">
+        <h3>📄 Documentos</h3>
+        <button class="btn-back" onclick="abrirEcra('home')">← Início</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="doc-nome" placeholder="Nome do documento (ex: Conta de Luz, Receita)">
+        <input type="text" id="doc-notas" placeholder="Link (Drive/Site) ou Observação / Código">
+        <input type="file" id="doc-file" style="padding: 10px; background: white;">
+        <button class="btn-primary" id="btn-doc" onclick="salvarDocumento()">Guardar Documento</button>
+        <p id="doc-status" style="font-size: 12px; color: var(--text-muted); text-align: center; display: none;">A guardar documento...</p>
+      </div>
+      <div id="lista-documentos"></div>
+    </div>
+
+    <!-- Menu Pílula -->
+    <div class="pill-nav">
+      <div class="nav-item active" id="nav-home" onclick="abrirEcra('home')">🏠</div>
+      <div class="nav-item" id="nav-mensagens" onclick="abrirEcra('mensagens')">💬</div>
+      <div class="nav-item" id="nav-calendario" onclick="abrirEcra('calendario')">📅</div>
+      <div class="nav-item" id="nav-metas" onclick="abrirEcra('metas')">🎯</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUDsSG9Il_J4EZz7tIB1mbbAOxnTBaJM",
+      authDomain: "familia-7c1eb.firebaseapp.com",
+      projectId: "familia-7c1eb",
+      storageBucket: "familia-7c1eb.firebasestorage.app",
+      messagingSenderId: "376403066544",
+      appId: "1:376403066544:web:52d9d6670022eafa0d0575"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let nomeAtual = localStorage.getItem('nomeAppFam') || "";
+    let emojiAtual = localStorage.getItem('emojiAppFam') || "👩";
+    let uidAtual = "local_user";
+    let usarModoLocal = false;
+    let listenersIniciados = false;
+
+    const mesesNomes = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+    const hoje = new Date();
+    let calMes = hoje.getMonth();
+    let calAno = hoje.getFullYear();
+    let calDiaSelecionado = hoje.getDate();
+    let cacheEventos = [];
+
+    // Preencher dias de aniversário
+    const selectDia = document.getElementById('aniv-dia');
+    for (let i = 1; i <= 31; i++) {
+      selectDia.innerHTML += `<option value="${i}">Dia ${i}</option>`;
+    }
+
+    window.selecionarEmoji = function(emoji, btnEl) {
+      emojiAtual = emoji;
+      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+      if (btnEl) btnEl.classList.add('selected');
+    };
+
+    // Autenticação silenciosa ou Google para garantir que o Firestore aceite conexões
+    async function garantirAutenticacaoFirebase() {
+      try {
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+        if (auth.currentUser) {
+          uidAtual = auth.currentUser.uid;
+        }
+        atualizarBadgeStatus("🟢 Sincronizado na Nuvem", "#d8f8df", "#0a331b");
+      } catch (err) {
+        console.warn("Aviso Auth Firebase (usando conexão direta/cache):", err.code || err.message);
+        atualizarBadgeStatus("🟢 Modo Família Ativo", "#e1f0ff", "#0f2942");
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        uidAtual = user.uid;
+        if (user.displayName && !nomeAtual) {
+          document.getElementById('username-input').value = user.displayName;
+        }
+      }
+    });
+
+    window.entrarComGoogle = async function() {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          uidAtual = result.user.uid;
+          const nome = document.getElementById('username-input').value.trim() || result.user.displayName || "Familiar";
+          localStorage.setItem('nomeAppFam', nome);
+          localStorage.setItem('emojiAppFam', emojiAtual);
+          iniciar(nome);
+        }
+      } catch (e) {
+        const input = document.getElementById('username-input').value.trim() || "Familiar";
+        localStorage.setItem('nomeAppFam', input);
+        localStorage.setItem('emojiAppFam', emojiAtual);
+        iniciar(input);
+      }
+    };
+
+    window.entrar = async function() {
+      const input = document.getElementById('username-input').value.trim();
+      if (!input) {
+        alert("Por favor, digite o seu nome ou apelido!");
+        return;
+      }
+      localStorage.setItem('nomeAppFam', input);
+      localStorage.setItem('emojiAppFam', emojiAtual);
+      await iniciar(input);
+    };
+
+    window.trocarPerfil = function() {
+      document.getElementById('username-input').value = nomeAtual;
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    };
+
+    function atualizarBadgeStatus(texto, bg, cor) {
+      const badge = document.getElementById('sync-status');
+      if (badge) {
+        badge.textContent = texto;
+        badge.style.background = bg;
+        badge.style.color = cor;
+      }
+    }
+
+    // Fallback inteligente em LocalStorage caso as regras do Firebase bloqueiem escrita externa
+    function lerLocal(colecao) {
+      try {
+        return JSON.parse(localStorage.getItem('fam_col_' + colecao) || '[]');
+      } catch {
+        return [];
+      }
+    }
+    function salvarLocal(colecao, lista) {
+      localStorage.setItem('fam_col_' + colecao, JSON.stringify(lista));
+    }
+
+    async function adicionarRegistro(colecao, dados) {
+      const itemComData = { ...dados, autorUid: uidAtual, criadoEmMs: Date.now() };
+      try {
+        await addDoc(collection(db, colecao), { ...itemComData, data: serverTimestamp() });
+      } catch (e) {
+        console.warn(`Fallback local ativado para ${colecao}:`, e.message);
+        usarModoLocal = true;
+        const lista = lerLocal(colecao);
+        lista.push({ id: 'loc_' + Date.now(), ...itemComData });
+        salvarLocal(colecao, lista);
+        renderizarTudoLocal();
+      }
+    }
+
+    async function atualizarRegistro(colecao, id, novosDados) {
+      if (String(id).startsWith('loc_') || usarModoLocal) {
+        const lista = lerLocal(colecao).map(item => item.id === id ? { ...item, ...novosDados } : item);
+        salvarLocal(colecao, lista);
+        renderizarTudoLocal();
+        return;
+      }
+      try {
+        await updateDoc(doc(db, colecao, id), novosDados);
+      } catch (e) {
+        console.warn("Erro ao atualizar no Firestore:", e.message);
+      }
+    }
+
+    async function excluirRegistro(colecao, id) {
+      if (String(id).startsWith('loc_') || usarModoLocal) {
+        const lista = lerLocal(colecao).filter(item => item.id !== id);
+        salvarLocal(colecao, lista);
+        renderizarTudoLocal();
+        return;
+      }
+      try {
+        await deleteDoc(doc(db, colecao, id));
+      } catch (e) {
+        console.warn("Erro ao excluir no Firestore:", e.message);
+      }
+    }
+
+    async function iniciar(nome) {
+      nomeAtual = nome;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+
+      const hora = new Date().getHours();
+      let saudacao = "Boa noite";
+      if (hora >= 5 && hora < 12) saudacao = "Bom dia";
+      else if (hora >= 12 && hora < 19) saudacao = "Boa tarde";
+      document.getElementById('greeting-text').innerHTML = `${saudacao}, <span>${emojiAtual} ${nome}</span>!`;
+
+      await garantirAutenticacaoFirebase();
+      gerarCalendario();
+      if (!listenersIniciados) {
+        listenersIniciados = true;
+        iniciarListenersFirestore();
+      }
+    }
+
+    window.abrirEcra = function(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('screen-' + id).classList.add('active');
+      const navItem = document.getElementById('nav-' + id);
+      if (navItem) navItem.classList.add('active');
+    };
+
+    /* 1. CALENDÁRIO */
+    window.mudarMes = function(delta) {
+      calMes += delta;
+      if (calMes < 0) { calMes = 11; calAno--; }
+      if (calMes > 11) { calMes = 0; calAno++; }
+      calDiaSelecionado = 1;
+      gerarCalendario();
+      renderizarEventosCalendario(cacheEventos);
+    };
+
+    window.selecionarDiaCalendario = function(dia) {
+      calDiaSelecionado = dia;
+      gerarCalendario();
+      renderizarEventosCalendario(cacheEventos);
+    };
+
+    window.gerarCalendario = function() {
+      document.getElementById('cal-month-label').textContent = `${mesesNomes[calMes]} ${calAno}`;
+      document.getElementById('cal-selected-label').textContent = `Novo compromisso para dia ${calDiaSelecionado} de ${mesesNomes[calMes]}`;
+      const diasNoMes = new Date(calAno, calMes + 1, 0).getDate();
+      const primeiroDia = new Date(calAno, calMes, 1).getDay();
+      const body = document.getElementById('calendar-body');
+      body.innerHTML = "";
+
+      for (let i = 0; i < primeiroDia; i++) {
+        body.innerHTML += `<div></div>`;
+      }
+      for (let dia = 1; dia <= diasNoMes; dia++) {
+        const selClass = dia === calDiaSelecionado ? "selected" : "";
+        const temEv = cacheEventos.some(ev => Number(ev.dia) === dia && Number(ev.mes) === calMes && Number(ev.ano) === calAno);
+        const evClass = temEv ? "has-event" : "";
+        body.innerHTML += `<div class="cal-day ${selClass} ${evClass}" onclick="selecionarDiaCalendario(${dia})">${dia}</div>`;
+      }
+    };
+
+    window.salvarEventoCalendario = async function() {
+      const input = document.getElementById('cal-desc-input');
+      const desc = input.value.trim();
+      if (!desc) return;
+      input.value = "";
+      await adicionarRegistro("calendario", {
+        dia: calDiaSelecionado,
+        mes: calMes,
+        ano: calAno,
+        desc,
+        autor: `${emojiAtual} ${nomeAtual}`
+      });
+    };
+
+    window.excluirEvento = async function(id) {
+      await excluirRegistro("calendario", id);
+    };
+
+    function renderizarEventosCalendario(lista) {
+      cacheEventos = lista;
+      gerarCalendario();
+      const divEventos = document.getElementById('calendar-events');
+      const filtrados = lista
+        .filter(ev => Number(ev.mes) === calMes && Number(ev.ano) === calAno)
+        .sort((a, b) => Number(a.dia) - Number(b.dia));
+
+      if (filtrados.length === 0) {
+        divEventos.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Nenhum compromisso neste mês.</p></div></div>`;
+        return;
+      }
+      divEventos.innerHTML = filtrados.map(ev => `
+        <div class="list-item">
+          <div class="list-item-content">
+            <h4>Dia ${ev.dia}: ${ev.desc}</h4>
+            <p>Por ${ev.autor || 'Familiar'}</p>
+          </div>
+          <div class="item-actions">
+            <button class="btn-small btn-del" onclick="excluirEvento('${ev.id}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* 2. METAS */
+    window.salvarMeta = async function() {
+      const nome = document.getElementById('meta-nome').value.trim();
+      const icone = document.getElementById('meta-icone').value.trim() || "🎯";
+      const total = parseFloat(document.getElementById('meta-total').value);
+      const guardado = parseFloat(document.getElementById('meta-guardado').value) || 0;
+      if (nome && total > 0) {
+        document.getElementById('meta-nome').value = '';
+        document.getElementById('meta-total').value = '';
+        document.getElementById('meta-guardado').value = '';
+        await adicionarRegistro("metas", { nome, icone, total, guardado, autor: nomeAtual });
+      }
+    };
+
+    window.adicionarValorMeta = async function(id, guardadoAtual) {
+      const extraStr = prompt("Qual valor deseja somar ao saldo guardado desta meta?");
+      const extra = parseFloat((extraStr || "").replace(",", "."));
+      if (!isNaN(extra) && extra > 0) {
+        await atualizarRegistro("metas", id, { guardado: Number(guardadoAtual) + extra });
+      }
+    };
+
+    window.excluirMeta = async function(id) {
+      await excluirRegistro("metas", id);
+    };
+
+    function renderizarMetas(lista) {
+      const div = document.getElementById('lista-metas');
+      if (lista.length === 0) {
+        div.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Nenhuma meta cadastrada ainda.</p></div></div>`;
+        return;
+      }
+      div.innerHTML = lista.map(m => {
+        const total = Number(m.total) || 1;
+        const guardado = Number(m.guardado) || 0;
+        const perc = Math.min(100, Math.round((guardado / total) * 100));
+        return `
+          <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+              <h4 style="margin:0;">${m.icone || '🎯'} ${m.nome}</h4>
+              <strong>R$ ${guardado} / R$ ${total} (${perc}%)</strong>
+            </div>
+            <div class="progress-container"><div class="progress-bar" style="width: ${perc}%"></div></div>
+            <div class="item-actions" style="width:100%; justify-content:space-between;">
+              <button class="btn-small btn-save-val" onclick="adicionarValorMeta('${m.id}', ${guardado})">💰 + Guardar Valor</button>
+              <button class="btn-small btn-del" onclick="excluirMeta('${m.id}')">🗑️ Excluir</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* 3. TELEFONES */
+    window.salvarTelefone = async function() {
+      const nome = document.getElementById('tel-nome').value.trim();
+      const numero = document.getElementById('tel-numero').value.trim();
+      if (nome && numero) {
+        document.getElementById('tel-nome').value = '';
+        document.getElementById('tel-numero').value = '';
+        await adicionarRegistro("telefones", { nome, numero, autor: nomeAtual });
+      }
+    };
+
+    window.excluirTelefone = async function(id) {
+      await excluirRegistro("telefones", id);
+    };
+
+    function renderizarTelefones(lista) {
+      const div = document.getElementById('lista-telefones');
+      if (lista.length === 0) {
+        div.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Nenhum contacto salvo.</p></div></div>`;
+        return;
+      }
+      div.innerHTML = lista.map(t => {
+        const numLimpo = String(t.numero || '').replace(/\D/g, '');
+        return `
+          <div class="list-item">
+            <div class="list-item-content">
+              <h4>📞 ${t.nome}</h4>
+              <p>${t.numero}</p>
+            </div>
+            <div class="item-actions">
+              <a href="https://wa.me/${numLimpo}" target="_blank" class="btn-small btn-wa">WhatsApp</a>
+              <button class="btn-small btn-del" onclick="excluirTelefone('${t.id}')">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* 4. ANIVERSÁRIOS */
+    window.salvarAniversario = async function() {
+      const nome = document.getElementById('aniv-nome').value.trim();
+      const dia = document.getElementById('aniv-dia').value;
+      const mes = document.getElementById('aniv-mes').value;
+      if (nome) {
+        document.getElementById('aniv-nome').value = '';
+        await adicionarRegistro("aniversarios", { nome, dia, mes, autor: nomeAtual });
+      }
+    };
+
+    window.excluirAniversario = async function(id) {
+      await excluirRegistro("aniversarios", id);
+    };
+
+    function renderizarAniversarios(lista) {
+      const div = document.getElementById('lista-aniversarios');
+      if (lista.length === 0) {
+        div.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Nenhum aniversário registado.</p></div></div>`;
+        return;
+      }
+      div.innerHTML = lista.map(a => `
+        <div class="list-item">
+          <div class="list-item-content">
+            <h4>🎂 ${a.nome}</h4>
+            <p>${a.dia} de ${a.mes}</p>
+          </div>
+          <button class="btn-small btn-del" onclick="excluirAniversario('${a.id}')">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    /* 5. COMPRAS */
+    window.salvarCompra = async function() {
+      const nome = document.getElementById('compra-nome').value.trim();
+      const qtd = document.getElementById('compra-qtd').value.trim();
+      if (nome) {
+        document.getElementById('compra-nome').value = '';
+        document.getElementById('compra-qtd').value = '';
+        await adicionarRegistro("compras", { nome, qtd, concluido: false, autor: nomeAtual });
+      }
+    };
+
+    window.alternarCompra = async function(id, estadoAtual) {
+      await atualizarRegistro("compras", id, { concluido: !estadoAtual });
+    };
+
+    window.excluirCompra = async function(id) {
+      await excluirRegistro("compras", id);
+    };
+
+    function renderizarCompras(lista) {
+      const div = document.getElementById('lista-compras');
+      if (lista.length === 0) {
+        div.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Lista de compras vazia.</p></div></div>`;
+        return;
+      }
+      div.innerHTML = lista.map(c => `
+        <div class="list-item" style="opacity: ${c.concluido ? '0.6' : '1'}">
+          <div class="list-item-content" style="cursor:pointer;" onclick="alternarCompra('${c.id}', ${!!c.concluido})">
+            <h4 style="text-decoration: ${c.concluido ? 'line-through' : 'none'}">
+              ${c.concluido ? '✅' : '⬜'} 🛒 ${c.nome} ${c.qtd ? '(' + c.qtd + ')' : ''}
+            </h4>
+            <p>Pedido por ${c.autor || 'Familiar'}</p>
+          </div>
+          <button class="btn-small btn-del" onclick="excluirCompra('${c.id}')">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    /* 6. MENSAGENS */
+    window.salvarMensagem = async function() {
+      const input = document.getElementById('msg-texto');
+      const texto = input.value.trim();
+      if (texto) {
+        input.value = '';
+        await adicionarRegistro("mensagens", {
+          texto,
+          autor: `${emojiAtual} ${nomeAtual}`
+        });
+      }
+    };
+
+    window.excluirMensagem = async function(id) {
+      await excluirRegistro("mensagens", id);
+    };
+
+    function renderizarMensagens(lista) {
+      const div = document.getElementById('lista-mensagens');
+      const ordenadas = [...lista].sort((a, b) => (a.criadoEmMs || 0) - (b.criadoEmMs || 0));
+      if (ordenadas.length === 0) {
+        div.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:30px;">Envie a primeira mensagem no mural da família!</p>`;
+        return;
+      }
+      div.innerHTML = ordenadas.map(m => {
+        const me = String(m.autor || '').includes(nomeAtual);
+        return `
+          <div style="margin-bottom:12px; text-align:${me ? 'right' : 'left'}">
+            <span style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:3px;">${m.autor || 'Familiar'}</span>
+            <div style="background:${me ? 'var(--primary)' : '#edf2f7'}; color:${me ? 'white' : 'var(--text-dark)'}; padding:10px 14px; border-radius:16px; display:inline-block; max-width:82%; text-align:left;">
+              ${m.texto}
+            </div>
+          </div>
+        `;
+      }).join('');
+      div.scrollTop = div.scrollHeight;
+    }
+
+    /* 7. FOTOS (Com compressão Base64 para funcionar sem depender do Firebase Storage pago) */
+    function comprimirImagemParaBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 600;
+            let w = img.width;
+            let h = img.height;
+            if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+            else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.72));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.salvarFoto = async function() {
+      const fileInput = document.getElementById('foto-file');
+      const legenda = document.getElementById('foto-legenda').value.trim() || "Momento em Família";
+      const file = fileInput.files[0];
+      if (!file) return alert("Por favor, selecione uma foto!");
+
+      document.getElementById('foto-status').style.display = 'block';
+      document.getElementById('btn-foto').disabled = true;
+
+      try {
+        const base64DataUrl = await comprimirImagemParaBase64(file);
+        await adicionarRegistro("fotos", {
+          url: base64DataUrl,
+          legenda,
+          autor: nomeAtual
+        });
+        fileInput.value = '';
+        document.getElementById('foto-legenda').value = '';
+      } catch (e) {
+        alert("Não foi possível processar a imagem.");
+      }
+
+      document.getElementById('foto-status').style.display = 'none';
+      document.getElementById('btn-foto').disabled = false;
+    };
+
+    window.excluirFoto = async function(id) {
+      await excluirRegistro("fotos", id);
+    };
+
+    function renderizarFotos(lista) {
+      const div = document.getElementById('lista-fotos');
+      if (lista.length === 0) {
+        div.innerHTML = `<p style="grid-column: 1 / -1; text-align:center; color:var(--text-muted);">Nenhuma foto publicada ainda.</p>`;
+        return;
+      }
+      div.innerHTML = lista.map(f => `
+        <div class="foto-card">
+          <img src="${f.url}" alt="${f.legenda || 'Foto'}">
+          <p><b>${f.legenda || 'Foto'}</b></p>
+          <p style="color:var(--text-muted);">Por ${f.autor || 'Familiar'}</p>
+          <div style="text-align:center; margin-top:6px;">
+            <button class="btn-small btn-del" onclick="excluirFoto('${f.id}')">🗑️ Excluir</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* 8. DOCUMENTOS */
+    window.salvarDocumento = async function() {
+      const nomeDoc = document.getElementById('doc-nome').value.trim();
+      const notas = document.getElementById('doc-notas').value.trim();
+      const fileInput = document.getElementById('doc-file');
+      const file = fileInput.files[0];
+
+      if (!nomeDoc && !file) {
+        return alert("Informe o nome do documento ou selecione um ficheiro!");
+      }
+
+      document.getElementById('doc-status').style.display = 'block';
+      document.getElementById('btn-doc').disabled = true;
+
+      let fileDataUrl = notas;
+      let nomeOriginal = file ? file.name : "";
+
+      if (file && file.size <= 450 * 1024) {
+        fileDataUrl = await new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => resolve(notas);
+          r.readAsDataURL(file);
+        });
+      }
+
+      await adicionarRegistro("documentos", {
+        nomeDoc: nomeDoc || nomeOriginal || "Documento",
+        notas,
+        url: fileDataUrl || "#",
+        nomeOriginal,
+        autor: nomeAtual
+      });
+
+      document.getElementById('doc-nome').value = '';
+      document.getElementById('doc-notas').value = '';
+      fileInput.value = '';
+      document.getElementById('doc-status').style.display = 'none';
+      document.getElementById('btn-doc').disabled = false;
+    };
+
+    window.excluirDocumento = async function(id) {
+      await excluirRegistro("documentos", id);
+    };
+
+    function renderizarDocumentos(lista) {
+      const div = document.getElementById('lista-documentos');
+      if (lista.length === 0) {
+        div.innerHTML = `<div class="list-item"><div class="list-item-content"><p>Nenhum documento guardado.</p></div></div>`;
+        return;
+      }
+      div.innerHTML = lista.map(d => {
+        const temLink = d.url && d.url !== "#";
+        return `
+          <div class="list-item">
+            <div class="list-item-content">
+              <h4>📄 ${d.nomeDoc}</h4>
+              <p>${d.notas ? d.notas + ' • ' : ''}Por ${d.autor || 'Familiar'}</p>
+            </div>
+            <div class="item-actions">
+              ${temLink ? `<a href="${d.url}" download="${d.nomeOriginal || d.nomeDoc}" target="_blank" class="btn-small btn-edit">Abrir/Baixar</a>` : ''}
+              <button class="btn-small btn-del" onclick="excluirDocumento('${d.id}')">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderizarTudoLocal() {
+      renderizarEventosCalendario(lerLocal("calendario"));
+      renderizarMetas(lerLocal("metas"));
+      renderizarTelefones(lerLocal("telefones"));
+      renderizarAniversarios(lerLocal("aniversarios"));
+      renderizarCompras(lerLocal("compras"));
+      renderizarMensagens(lerLocal("mensagens"));
+      renderizarFotos(lerLocal("fotos"));
+      renderizarDocumentos(lerLocal("documentos"));
+    }
+
+    function observarColecaoSegura(nomeColecao, callbackRender) {
+      onSnapshot(
+        collection(db, nomeColecao),
+        (snap) => {
+          const itens = [];
+          snap.forEach(d => itens.push({ id: d.id, ...d.data() }));
+          salvarLocal(nomeColecao, itens);
+          callbackRender(itens);
+        },
+        (erro) => {
+          console.warn(`Usando cache local para ${nomeColecao}:`, erro.message);
+          usarModoLocal = true;
+          callbackRender(lerLocal(nomeColecao));
+        }
+      );
+    }
+
+    function iniciarListenersFirestore() {
+      observarColecaoSegura("calendario", renderizarEventosCalendario);
+      observarColecaoSegura("metas", renderizarMetas);
+      observarColecaoSegura("telefones", renderizarTelefones);
+      observarColecaoSegura("aniversarios", renderizarAniversarios);
+      observarColecaoSegura("compras", renderizarCompras);
+      observarColecaoSegura("mensagens", renderizarMensagens);
+      observarColecaoSegura("fotos", renderizarFotos);
+      observarColecaoSegura("documentos", renderizarDocumentos);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (nomeAtual) {
+        iniciar(nomeAtual);
+      }
+    });
+  </script>
+</body>
+</html>
