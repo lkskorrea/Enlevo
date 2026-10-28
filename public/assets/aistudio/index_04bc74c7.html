@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Família</title>
+  <style>
+    :root {
+      --primary: #a2d2ff; 
+      --secondary: #ffafcc; 
+      --accent: #b9fbc0; 
+      --bg-color: #fcfcfc; 
+      --text-dark: #5c5c5c;
+      --card-bg: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color); color: var(--text-dark); min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Ecrã de Login */
+    #login-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    }
+    .login-card {
+      background: var(--card-bg); padding: 40px 30px; border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); text-align: center; width: 80%; max-width: 320px;
+    }
+    .login-card h2 { margin-top: 0; color: #8e9aaf; }
+    input, select {
+      width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px;
+      border: 1px solid #eee; font-size: 16px; outline: none; background: #fafafa;
+    }
+    button.btn-primary {
+      width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px; border: none;
+      background-color: var(--primary); color: #fff; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 4px 15px rgba(162, 210, 255, 0.4);
+    }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+    /* Aplicação Principal */
+    #main-app { display: none; padding: 20px; padding-bottom: 90px; }
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .header { margin-bottom: 25px; margin-top: 10px; }
+    .greeting { font-size: 1.6em; font-weight: 700; color: var(--text-dark); }
+    .greeting span { color: #8e9aaf; }
+
+    /* Grelha de Menus */
+    .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .menu-card {
+      background: var(--card-bg); padding: 20px; border-radius: 20px; text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #f0f0f0;
+    }
+    .menu-card .icon { font-size: 30px; margin-bottom: 10px; }
+    .menu-card .title { font-weight: 600; font-size: 14px; }
+    .c-cal { background-color: #eaf4f4; } .c-chat { background-color: #f8edeb; }
+    .c-meta { background-color: #e2ece9; } .c-comp { background-color: #fff1e6; }
+    .c-aniv { background-color: #fde2e4; } .c-tel { background-color: #e2eafc; }
+    .c-fot { background-color: #ffecd1; } .c-doc { background-color: #e8e8e4; }
+
+    /* Elementos de Lista */
+    .list-item {
+      background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center;
+    }
+    .list-item-content h4 { margin: 0 0 5px 0; font-size: 16px; }
+    .list-item-content p { margin: 0; font-size: 13px; color: #888; }
+    .btn-action { background: #25D366; color: white; text-decoration: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; display: inline-block; }
+    .btn-download { background: var(--primary); }
+
+    /* Calendário */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+    .cal-header { text-align: center; font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 10px;}
+    .cal-day { background: white; aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 5px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02); position: relative; }
+    .cal-day.has-event::after { content: ''; width: 6px; height: 6px; background: var(--secondary); border-radius: 50%; position: absolute; bottom: 6px; }
+
+    /* Metas */
+    .progress-container { width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 8px; margin-top: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; background-color: var(--accent); border-radius: 10px; }
+
+    /* Menu Flutuante */
+    .pill-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffffff; padding: 10px 20px; border-radius: 50px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); display: flex; gap: 15px; z-index: 1000; }
+    .nav-item { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: #ccc; transition: all 0.3s ease; }
+    .nav-item.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(162, 210, 255, 0.5); }
+    .form-group { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+
+    /* Galeria Fotos */
+    .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .foto-card { background: white; padding: 5px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .foto-card img { width: 100%; border-radius: 8px; aspect-ratio: 1; object-fit: cover; }
+    .foto-card p { font-size: 12px; margin: 5px 0 0 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  </style>
+</head>
+<body>
+
+  <div id="login-screen">
+    <div class="login-card">
+      <h2>Bem-vindo!</h2>
+      <p>Qual é o seu nome?</p>
+      <input type="text" id="username-input" placeholder="O seu nome" autocomplete="off">
+      <button class="btn-primary" onclick="entrar()">Entrar</button>
+    </div>
+  </div>
+
+  <div id="main-app">
+    <div class="header">
+      <div class="greeting" id="greeting-text">Bom dia, <span>Nome</span>!</div>
+    </div>
+
+    <!-- Home -->
+    <div id="screen-home" class="screen active">
+      <div class="grid-menu">
+        <div class="menu-card c-cal" onclick="abrirEcra('calendario')"><div class="icon">📅</div><div class="title">Calendário</div></div>
+        <div class="menu-card c-chat" onclick="abrirEcra('mensagens')"><div class="icon">💬</div><div class="title">Mensagens</div></div>
+        <div class="menu-card c-meta" onclick="abrirEcra('metas')"><div class="icon">🎯</div><div class="title">Metas</div></div>
+        <div class="menu-card c-comp" onclick="abrirEcra('compras')"><div class="icon">🛒</div><div class="title">Compras</div></div>
+        <div class="menu-card c-aniv" onclick="abrirEcra('aniversarios')"><div class="icon">🎂</div><div class="title">Aniversários</div></div>
+        <div class="menu-card c-tel" onclick="abrirEcra('telefones')"><div class="icon">📞</div><div class="title">Telefones</div></div>
+        <div class="menu-card c-fot" onclick="abrirEcra('fotos')"><div class="icon">🖼️</div><div class="title">Fotos</div></div>
+        <div class="menu-card c-doc" onclick="abrirEcra('documentos')"><div class="icon">📄</div><div class="title">Documentos</div></div>
+      </div>
+    </div>
+
+    <!-- Calendário -->
+    <div id="screen-calendario" class="screen">
+      <h3>O Nosso Mês</h3>
+      <div class="calendar-grid cal-header"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div>
+      <div id="calendar-body" class="calendar-grid"></div>
+      <div id="calendar-events" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Metas -->
+    <div id="screen-metas" class="screen">
+      <h3>Metas da Família</h3>
+      <div class="form-group">
+        <input type="text" id="meta-nome" placeholder="Nome da Meta (ex: Férias)">
+        <input type="text" id="meta-icone" placeholder="Ícone (um emoji 🏖️)">
+        <input type="number" id="meta-total" placeholder="Valor Total">
+        <input type="number" id="meta-guardado" placeholder="Valor Já Guardado">
+        <button class="btn-primary" onclick="salvarMeta()">Adicionar Meta</button>
+      </div>
+      <div id="lista-metas"></div>
+    </div>
+
+    <!-- Telefones -->
+    <div id="screen-telefones" class="screen">
+      <h3>Telefones Úteis</h3>
+      <div class="form-group">
+        <input type="text" id="tel-nome" placeholder="Nome do Contacto">
+        <input type="tel" id="tel-numero" placeholder="Número (ex: 552199...)">
+        <button class="btn-primary" onclick="salvarTelefone()">Adicionar Contacto</button>
+      </div>
+      <div id="lista-telefones"></div>
+    </div>
+
+    <!-- Aniversários -->
+    <div id="screen-aniversarios" class="screen">
+      <h3>Aniversários</h3>
+      <div class="form-group">
+        <input type="text" id="aniv-nome" placeholder="Nome">
+        <select id="aniv-dia"></select>
+        <select id="aniv-mes">
+          <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option><option value="Março">Março</option><option value="Abril">Abril</option><option value="Maio">Maio</option><option value="Junho">Junho</option><option value="Julho">Julho</option><option value="Agosto">Agosto</option><option value="Setembro">Setembro</option><option value="Outubro">Outubro</option><option value="Novembro">Novembro</option><option value="Dezembro">Dezembro</option>
+        </select>
+        <button class="btn-primary" onclick="salvarAniversario()">Adicionar Aniversário</button>
+      </div>
+      <div id="lista-aniversarios"></div>
+    </div>
+
+    <!-- Compras -->
+    <div id="screen-compras" class="screen">
+      <h3>Lista de Compras</h3>
+      <div class="form-group" style="display:flex; gap:10px;">
+        <input type="text" id="compra-nome" placeholder="Ex: Pão">
+        <button class="btn-primary" style="width:auto; margin-top:0;" onclick="salvarCompra()">+</button>
+      </div>
+      <div id="lista-compras"></div>
+    </div>
+
+    <!-- Mensagens -->
+    <div id="screen-mensagens" class="screen">
+      <h3>Mural / Chat</h3>
+      <div id="lista-mensagens" style="height: 50vh; overflow-y: auto; margin-bottom: 10px; padding-bottom:10px;"></div>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="msg-texto" placeholder="Escreva uma mensagem...">
+        <button class="btn-primary" style="width:auto; margin-top:10px;" onclick="salvarMensagem()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Fotos -->
+    <div id="screen-fotos" class="screen">
+      <h3>Álbuns de Fotos</h3>
+      <div class="form-group">
+        <input type="file" id="foto-file" accept="image/*" style="padding: 10px; background: white;">
+        <input type="text" id="foto-legenda" placeholder="Nome/Álbum da foto">
+        <button class="btn-primary" id="btn-foto" onclick="salvarFoto()">Carregar Foto</button>
+        <p id="foto-status" style="font-size: 12px; color: #888; text-align: center; display: none;">A processar o upload...</p>
+      </div>
+      <div id="lista-fotos" class="galeria-grid"></div>
+    </div>
+
+    <!-- Documentos -->
+    <div id="screen-documentos" class="screen">
+      <h3>Documentos</h3>
+      <div class="form-group">
+        <input type="file" id="doc-file" style="padding: 10px; background: white;">
+        <input type="text" id="doc-nome" placeholder="Nome do documento">
+        <button class="btn-primary" id="btn-doc" onclick="salvarDocumento()">Guardar Documento</button>
+        <p id="doc-status" style="font-size: 12px; color: #888; text-align: center; display: none;">A processar o upload...</p>
+      </div>
+      <div id="lista-documentos"></div>
+    </div>
+
+    <!-- Menu Pílula -->
+    <div class="pill-nav">
+      <div class="nav-item active" id="nav-home" onclick="abrirEcra('home')">🏠</div>
+      <div class="nav-item" id="nav-mensagens" onclick="abrirEcra('mensagens')">💬</div>
+      <div class="nav-item" id="nav-calendario" onclick="abrirEcra('calendario')">📅</div>
+      <div class="nav-item" id="nav-metas" onclick="abrirEcra('metas')">🎯</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlUDsSG9Il_J4EZz7tIB1mbbAOxnTBaJM",
+      authDomain: "familia-7c1eb.firebaseapp.com",
+      projectId: "familia-7c1eb",
+      storageBucket: "familia-7c1eb.firebasestorage.app",
+      messagingSenderId: "376403066544",
+      appId: "1:376403066544:web:52d9d6670022eafa0d0575"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    
+    // Inicia Firestore (Garante que as mensagens funcionam sempre)
+    const db = getFirestore(app);
+    
+    // Inicia Storage de forma segura para não bloquear o resto
+    let storage = null;
+    try {
+      storage = getStorage(app);
+    } catch (e) {
+      console.error("Storage ainda não está pronto:", e);
+    }
+
+    let nomeAtual = "";
+
+    const selectDia = document.getElementById('aniv-dia');
+    for(let i=1; i<=31; i++) { selectDia.innerHTML += `<option value="${i}">${i}</option>`; }
+
+    window.entrar = function() {
+      const input = document.getElementById('username-input').value.trim();
+      if (input !== "") { localStorage.setItem('nomeAppFam', input); iniciar(input); }
+    }
+
+    function iniciar(nome) {
+      nomeAtual = nome;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      const hora = new Date().getHours();
+      let saudacao = "Boa noite";
+      if (hora >= 5 && hora < 12) saudacao = "Bom dia";
+      else if (hora >= 12 && hora < 19) saudacao = "Boa tarde";
+      document.getElementById('greeting-text').innerHTML = `${saudacao}, <span>${nome}</span>!`;
+      gerarCalendario();
+    }
+
+    window.abrirEcra = function(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('screen-' + id).classList.add('active');
+      const navItem = document.getElementById('nav-' + id);
+      if(navItem) navItem.classList.add('active');
+    }
+
+    /* FIRESTORE: CALENDÁRIO, METAS, CHAT (Protegidos) */
+    window.gerarCalendario = function() {
+      const hoje = new Date(); const mes = hoje.getMonth(); const ano = hoje.getFullYear();
+      const diasNoMes = new Date(ano, mes + 1, 0).getDate(); const primeiroDia = new Date(ano, mes, 1).getDay();
+      const body = document.getElementById('calendar-body'); body.innerHTML = "";
+      for(let i = 0; i < primeiroDia; i++) body.innerHTML += `<div></div>`;
+      for(let dia = 1; dia <= diasNoMes; dia++) body.innerHTML += `<div class="cal-day" id="cal-dia-${dia}" onclick="adicionarEvento(${dia}, ${mes}, ${ano})">${dia}</div>`;
+    }
+    
+    window.adicionarEvento = async function(dia, mes, ano) {
+      const desc = prompt(`Evento para dia ${dia}:`);
+      if(desc) await addDoc(collection(db, "calendario"), { dia, mes, ano, desc, autor: nomeAtual, data: serverTimestamp() });
+    }
+    
+    onSnapshot(collection(db, "calendario"), (snap) => {
+      const hoje = new Date(); const divEventos = document.getElementById('calendar-events'); divEventos.innerHTML = "<h4>Eventos deste mês</h4>";
+      document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('has-event'));
+      snap.forEach(doc => {
+        const ev = doc.data();
+        if(ev.mes === hoje.getMonth() && ev.ano === hoje.getFullYear()) {
+           const diaEl = document.getElementById(`cal-dia-${ev.dia}`); if(diaEl) diaEl.classList.add('has-event');
+           divEventos.innerHTML += `<div class="list-item"><div class="list-item-content"><h4>Dia ${ev.dia}: ${ev.desc}</h4><p>Por ${ev.autor}</p></div></div>`;
+        }
+      });
+    });
+
+    window.salvarMeta = async function() {
+      const nome = document.getElementById('meta-nome').value; const icone = document.getElementById('meta-icone').value || "🎯";
+      const total = parseFloat(document.getElementById('meta-total').value); const guardado = parseFloat(document.getElementById('meta-guardado').value);
+      if(nome && total > 0) { 
+        await addDoc(collection(db, "metas"), { nome, icone, total, guardado, data: serverTimestamp() }); 
+        document.getElementById('meta-nome').value = ''; document.getElementById('meta-total').value = ''; document.getElementById('meta-guardado').value = ''; 
+      }
+    }
+    
+    onSnapshot(query(collection(db, "metas"), orderBy("data", "desc")), (snap) => {
+      const div = document.getElementById('lista-metas'); div.innerHTML = "";
+      snap.forEach(doc => {
+        const m = doc.data(); let perc = (m.guardado / m.total) * 100; if(perc > 100) perc = 100;
+        div.innerHTML += `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; justify-content:space-between; width:100%;"><h4>${m.icone} ${m.nome}</h4><span>$${m.guardado} / $${m.total}</span></div><div class="progress-container"><div class="progress-bar" style="width: ${perc}%"></div></div></div>`;
+      });
+    });
+
+    window.salvarTelefone = async function() {
+      const nome = document.getElementById('tel-nome').value; const numero = document.getElementById('tel-numero').value;
+      if(nome && numero) { await addDoc(collection(db, "telefones"), { nome, numero }); document.getElementById('tel-nome').value = ''; document.getElementById('tel-numero').value = ''; }
+    }
+    onSnapshot(collection(db, "telefones"), (snap) => {
+      const div = document.getElementById('lista-telefones'); div.innerHTML = "";
+      snap.forEach(doc => {
+        const t = doc.data(); const numLimpo = t.numero.replace(/\D/g,'');
+        div.innerHTML += `<div class="list-item"><div class="list-item-content"><h4>${t.nome}</h4><p>${t.numero}</p></div><a href="https://wa.me/${numLimpo}" target="_blank" class="btn-action">WhatsApp</a></div>`;
+      });
+    });
+
+    window.salvarAniversario = async function() {
+      const nome = document.getElementById('aniv-nome').value; const dia = document.getElementById('aniv-dia').value; const mes = document.getElementById('aniv-mes').value;
+      if(nome) { await addDoc(collection(db, "aniversarios"), { nome, dia, mes }); document.getElementById('aniv-nome').value = ''; }
+    }
+    onSnapshot(collection(db, "aniversarios"), (snap) => {
+      const div = document.getElementById('lista-aniversarios'); div.innerHTML = "";
+      snap.forEach(doc => { const a = doc.data(); div.innerHTML += `<div class="list-item"><div class="list-item-content"><h4>🎂 ${a.nome}</h4><p>${a.dia} de ${a.mes}</p></div></div>`; });
+    });
+
+    window.salvarCompra = async function() {
+      const nome = document.getElementById('compra-nome').value;
+      if(nome) { await addDoc(collection(db, "compras"), { nome, autor: nomeAtual }); document.getElementById('compra-nome').value = ''; }
+    }
+    onSnapshot(collection(db, "compras"), (snap) => {
+      const div = document.getElementById('lista-compras'); div.innerHTML = "";
+      snap.forEach(doc => { const c = doc.data(); div.innerHTML += `<div class="list-item"><div class="list-item-content"><h4>🛒 ${c.nome}</h4><p>Pedida por ${c.autor}</p></div></div>`; });
+    });
+
+    window.salvarMensagem = async function() {
+      const texto = document.getElementById('msg-texto').value;
+      if(texto) { await addDoc(collection(db, "mensagens"), { texto, autor: nomeAtual, data: serverTimestamp() }); document.getElementById('msg-texto').value = ''; }
+    }
+    onSnapshot(query(collection(db, "mensagens"), orderBy("data", "asc")), (snap) => {
+      const div = document.getElementById('lista-mensagens'); div.innerHTML = "";
+      snap.forEach(doc => {
+        const m = doc.data(); const me = m.autor === nomeAtual;
+        div.innerHTML += `<div style="margin-bottom:10px; text-align:${me ? 'right' : 'left'}"><span style="font-size:11px; color:#aaa">${m.autor}</span><div style="background:${me ? 'var(--primary)' : '#e0e0e0'}; color:${me ? 'white' : 'black'}; padding:10px 15px; border-radius:15px; display:inline-block; max-width:80%;">${m.texto}</div></div>`;
+      });
+      div.scrollTop = div.scrollHeight;
+    });
+
+    /* FIREBASE STORAGE: FOTOS E DOCS */
+    window.salvarFoto = async function() {
+      if(!storage) return alert("O sistema de ficheiros ainda está a iniciar. Tente novamente em instantes.");
+      
+      const fileInput = document.getElementById('foto-file');
+      const legenda = document.getElementById('foto-legenda').value || "Sem nome";
+      const file = fileInput.files[0];
+      
+      if(!file) return alert("Por favor, selecione uma foto!");
+      
+      document.getElementById('foto-status').style.display = 'block';
+      document.getElementById('btn-foto').disabled = true;
+
+      try {
+        const storageRef = ref(storage, 'fotos/' + Date.now() + '_' + file.name);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await addDoc(collection(db, "fotos"), { url, legenda, autor: nomeAtual, data: serverTimestamp() });
+        fileInput.value = ''; document.getElementById('foto-legenda').value = '';
+      } catch (error) { alert("Erro ao enviar imagem. As regras do Storage podem ainda estar a ser propagadas."); }
+      
+      document.getElementById('foto-status').style.display = 'none';
+      document.getElementById('btn-foto').disabled = false;
+    }
+
+    onSnapshot(query(collection(db, "fotos"), orderBy("data", "desc")), (snap) => {
+      const div = document.getElementById('lista-fotos'); div.innerHTML = "";
+      snap.forEach(doc => {
+        const f = doc.data();
+        div.innerHTML += `<div class="foto-card"><img src="${f.url}"><p><b>${f.legenda}</b></p><p style="color:#aaa;">Por ${f.autor}</p></div>`;
+      });
+    });
+
+    window.salvarDocumento = async function() {
+      if(!storage) return alert("O sistema de ficheiros ainda está a iniciar. Tente novamente em instantes.");
+      
+      const fileInput = document.getElementById('doc-file');
+      const nomeDoc = document.getElementById('doc-nome').value || "Documento";
+      const file = fileInput.files[0];
+      
+      if(!file) return alert("Por favor, selecione um ficheiro!");
+      
+      document.getElementById('doc-status').style.display = 'block';
+      document.getElementById('btn-doc').disabled = true;
+
+      try {
+        const storageRef = ref(storage, 'documentos/' + Date.now() + '_' + file.name);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await addDoc(collection(db, "documentos"), { url, nomeDoc, nomeOriginal: file.name, autor: nomeAtual, data: serverTimestamp() });
+        fileInput.value = ''; document.getElementById('doc-nome').value = '';
+      } catch (error) { alert("Erro ao enviar documento. As regras do Storage podem ainda estar a ser propagadas."); }
+      
+      document.getElementById('doc-status').style.display = 'none';
+      document.getElementById('btn-doc').disabled = false;
+    }
+
+    onSnapshot(query(collection(db, "documentos"), orderBy("data", "desc")), (snap) => {
+      const div = document.getElementById('lista-documentos'); div.innerHTML = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        div.innerHTML += `<div class="list-item"><div class="list-item-content"><h4>📄 ${d.nomeDoc}</h4><p>Por ${d.autor}</p></div><a href="${d.url}" target="_blank" class="btn-action btn-download">Baixar</a></div>`;
+      });
+    });
+
+    window.onload = () => {
+      const nomeGuardado = localStorage.getItem('nomeAppFam');
+      if (nomeGuardado) iniciar(nomeGuardado);
+    }
+  </script>
+</body>
+</html>

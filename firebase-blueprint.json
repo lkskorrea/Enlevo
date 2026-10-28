@@ -1,0 +1,185 @@
+{
+  "entities": {
+    "FamilyProfile": {
+      "title": "FamilyProfile",
+      "description": "Perfil individual de cada membro autenticado da família.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID do usuário." },
+        "displayName": { "type": "string", "description": "Apelido familiar escolhido pelo usuário." },
+        "avatarEmoji": { "type": "string", "description": "Emoji representativo do membro da família." },
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar compartilhado." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["uid", "displayName", "avatarEmoji", "familyId", "createdAt", "updatedAt"]
+    },
+    "CalendarEvent": {
+      "title": "CalendarEvent",
+      "description": "Compromisso ou evento no calendário mensal da família.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "day": { "type": "integer", "description": "Dia do mês (1 a 31)." },
+        "month": { "type": "integer", "description": "Índice do mês (0 a 11)." },
+        "year": { "type": "integer", "description": "Ano com 4 dígitos." },
+        "description": { "type": "string", "description": "Descrição do evento." },
+        "authorUid": { "type": "string", "description": "UID de quem criou o evento." },
+        "authorName": { "type": "string", "description": "Nome do familiar que criou o evento." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "day", "month", "year", "description", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "FamilyMessage": {
+      "title": "FamilyMessage",
+      "description": "Mensagem publicada no mural/chat da família.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "text": { "type": "string", "description": "Conteúdo da mensagem." },
+        "authorUid": { "type": "string", "description": "UID do autor da mensagem." },
+        "authorName": { "type": "string", "description": "Apelido do autor da mensagem." },
+        "authorEmoji": { "type": "string", "description": "Emoji do autor da mensagem." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "text", "authorUid", "authorName", "authorEmoji", "createdAt", "updatedAt"]
+    },
+    "FamilyGoal": {
+      "title": "FamilyGoal",
+      "description": "Meta financeira ou objetivo compartilhado da família.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "name": { "type": "string", "description": "Nome da meta (ex: Férias)." },
+        "iconEmoji": { "type": "string", "description": "Emoji representativo da meta." },
+        "targetAmount": { "type": "number", "description": "Valor total da meta." },
+        "savedAmount": { "type": "number", "description": "Valor já guardado para a meta." },
+        "authorUid": { "type": "string", "description": "UID de quem criou a meta." },
+        "authorName": { "type": "string", "description": "Nome do familiar que criou a meta." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "name", "iconEmoji", "targetAmount", "savedAmount", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "ShoppingItem": {
+      "title": "ShoppingItem",
+      "description": "Item da lista de compras compartilhada da família.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "name": { "type": "string", "description": "Nome do item a comprar." },
+        "quantityNote": { "type": "string", "description": "Quantidade ou observação." },
+        "completed": { "type": "boolean", "description": "Indica se o item já foi comprado." },
+        "authorUid": { "type": "string", "description": "UID de quem adicionou o item." },
+        "authorName": { "type": "string", "description": "Nome do familiar que pediu o item." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "name", "quantityNote", "completed", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "BirthdayItem": {
+      "title": "BirthdayItem",
+      "description": "Registro de aniversário de um familiar ou amigo.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "personName": { "type": "string", "description": "Nome do aniversariante." },
+        "day": { "type": "integer", "description": "Dia do aniversário (1 a 31)." },
+        "monthName": { "type": "string", "description": "Nome do mês em português." },
+        "authorUid": { "type": "string", "description": "UID de quem cadastrou." },
+        "authorName": { "type": "string", "description": "Nome de quem cadastrou." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "personName", "day", "monthName", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "UsefulContact": {
+      "title": "UsefulContact",
+      "description": "Telefone útil ou de emergência com atalho para WhatsApp e chamada.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "name": { "type": "string", "description": "Nome do contato." },
+        "phoneNumber": { "type": "string", "description": "Número de telefone." },
+        "category": { "type": "string", "description": "Categoria do contato (Saúde, Serviços, Família)." },
+        "authorUid": { "type": "string", "description": "UID de quem cadastrou." },
+        "authorName": { "type": "string", "description": "Nome de quem cadastrou." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "name", "phoneNumber", "category", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "FamilyPhoto": {
+      "title": "FamilyPhoto",
+      "description": "Foto compartilhada no álbum da família com miniatura otimizada.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "caption": { "type": "string", "description": "Legenda ou álbum da foto." },
+        "imageBase64": { "type": "string", "description": "Imagem comprimida em Base64." },
+        "authorUid": { "type": "string", "description": "UID de quem publicou." },
+        "authorName": { "type": "string", "description": "Nome de quem publicou." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "caption", "imageBase64", "authorUid", "authorName", "createdAt", "updatedAt"]
+    },
+    "FamilyDocument": {
+      "title": "FamilyDocument",
+      "description": "Documento ou registro importante compartilhado na família.",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string", "description": "Identificador do espaço familiar." },
+        "title": { "type": "string", "description": "Nome do documento." },
+        "notesOrUrl": { "type": "string", "description": "Link externo, código ou observações do documento." },
+        "fileName": { "type": "string", "description": "Nome original do arquivo anexado (se houver)." },
+        "fileSummary": { "type": "string", "description": "Conteúdo textual ou resumo extraído do arquivo." },
+        "authorUid": { "type": "string", "description": "UID de quem guardou o documento." },
+        "authorName": { "type": "string", "description": "Nome de quem guardou o documento." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp de criação." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp de atualização." }
+      },
+      "required": ["familyId", "title", "notesOrUrl", "fileName", "fileSummary", "authorUid", "authorName", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/profiles/{userId}": {
+      "schema": "FamilyProfile",
+      "description": "Perfis individuais dos membros autenticados."
+    },
+    "/calendar_events/{eventId}": {
+      "schema": "CalendarEvent",
+      "description": "Eventos do calendário mensal da família."
+    },
+    "/messages/{messageId}": {
+      "schema": "FamilyMessage",
+      "description": "Mensagens do mural e chat da família."
+    },
+    "/goals/{goalId}": {
+      "schema": "FamilyGoal",
+      "description": "Metas financeiras da família."
+    },
+    "/shopping_items/{itemId}": {
+      "schema": "ShoppingItem",
+      "description": "Itens da lista de compras da família."
+    },
+    "/birthdays/{birthdayId}": {
+      "schema": "BirthdayItem",
+      "description": "Lista de aniversários da família."
+    },
+    "/contacts/{contactId}": {
+      "schema": "UsefulContact",
+      "description": "Telefones úteis da família."
+    },
+    "/photos/{photoId}": {
+      "schema": "FamilyPhoto",
+      "description": "Galeria de fotos compartilhadas da família."
+    },
+    "/documents/{docId}": {
+      "schema": "FamilyDocument",
+      "description": "Documentos importantes da família."
+    }
+  }
+}

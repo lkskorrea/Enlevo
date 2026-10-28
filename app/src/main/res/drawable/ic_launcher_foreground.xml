@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Casa acolhedora representando o lar da família -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,26 L26,50 L33,50 L33,78 L75,78 L75,50 L82,50 Z" />
+    <!-- Coração central dentro da casa em tom rosa suave -->
+    <path
+        android:fillColor="#FFFFAFCC"
+        android:pathData="M54,68 C54,68 42,59 42,51 C42,46.5 45.5,43 50,43 C52,43 53.5,44 54,45.5 C54.5,44 56,43 58,43 C62.5,43 66,46.5 66,51 C66,59 54,68 54,68 Z" />
+</vector>

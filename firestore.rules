@@ -1,0 +1,349 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTimestamps(data) {
+      return data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // 1. Validation Helper: FamilyProfile
+    function isValidFamilyProfile(data) {
+      return data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 60 &&
+             data.avatarEmoji is string && data.avatarEmoji.size() >= 1 && data.avatarEmoji.size() <= 16 &&
+             data.familyId is string && data.familyId == 'familia_principal' &&
+             isValidTimestamps(data);
+    }
+
+    // 2. Validation Helper: CalendarEvent
+    function isValidCalendarEvent(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.day is int && data.day >= 1 && data.day <= 31 &&
+             data.month is int && data.month >= 0 && data.month <= 11 &&
+             data.year is int && data.year >= 2020 && data.year <= 2100 &&
+             data.description is string && data.description.size() >= 1 && data.description.size() <= 200 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 3. Validation Helper: FamilyMessage
+    function isValidFamilyMessage(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.text is string && data.text.size() >= 1 && data.text.size() <= 500 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             data.authorEmoji is string && data.authorEmoji.size() >= 1 && data.authorEmoji.size() <= 16 &&
+             isValidTimestamps(data);
+    }
+
+    // 4. Validation Helper: FamilyGoal
+    function isValidFamilyGoal(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.iconEmoji is string && data.iconEmoji.size() >= 1 && data.iconEmoji.size() <= 16 &&
+             data.targetAmount is number && data.targetAmount > 0 && data.targetAmount <= 1000000000 &&
+             data.savedAmount is number && data.savedAmount >= 0 && data.savedAmount <= 1000000000 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 5. Validation Helper: ShoppingItem
+    function isValidShoppingItem(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.quantityNote is string && data.quantityNote.size() <= 60 &&
+             data.completed is bool &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 6. Validation Helper: BirthdayItem
+    function isValidBirthdayItem(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.personName is string && data.personName.size() >= 1 && data.personName.size() <= 100 &&
+             data.day is int && data.day >= 1 && data.day <= 31 &&
+             data.monthName is string && data.monthName.size() >= 1 && data.monthName.size() <= 30 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 7. Validation Helper: UsefulContact
+    function isValidUsefulContact(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.phoneNumber is string && data.phoneNumber.size() >= 3 && data.phoneNumber.size() <= 40 &&
+             data.category is string && data.category.size() <= 40 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 8. Validation Helper: FamilyPhoto
+    function isValidFamilyPhoto(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.caption is string && data.caption.size() >= 1 && data.caption.size() <= 120 &&
+             data.imageBase64 is string && data.imageBase64.size() >= 10 && data.imageBase64.size() <= 600000 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // 9. Validation Helper: FamilyDocument
+    function isValidFamilyDocument(data) {
+      return data.familyId is string && data.familyId == 'familia_principal' &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.notesOrUrl is string && data.notesOrUrl.size() <= 500 &&
+             data.fileName is string && data.fileName.size() <= 120 &&
+             data.fileSummary is string && data.fileSummary.size() <= 50000 &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 60 &&
+             isValidTimestamps(data);
+    }
+
+    // Collection 1: /profiles/{userId} (Owner-Isolated Profile)
+    match /profiles/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && existing().uid == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().uid == request.auth.uid &&
+                       incoming().keys().hasAll(['uid', 'displayName', 'avatarEmoji', 'familyId', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['uid', 'displayName', 'avatarEmoji', 'familyId', 'createdAt', 'updatedAt']) &&
+                       isValidFamilyProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidFamilyProfile(incoming()) &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().uid == existing().uid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'avatarEmoji', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    // Collection 2: /calendar_events/{eventId}
+    match /calendar_events/{eventId} {
+      allow get: if isSignedIn() && isValidId(eventId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(eventId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'day', 'month', 'year', 'description', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'day', 'month', 'year', 'description', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidCalendarEvent(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidCalendarEvent(incoming()) &&
+                       isValidId(eventId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['day', 'month', 'year', 'description', 'authorName', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(eventId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 3: /messages/{messageId}
+    match /messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(messageId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'text', 'authorUid', 'authorName', 'authorEmoji', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'text', 'authorUid', 'authorName', 'authorEmoji', 'createdAt', 'updatedAt']) &&
+                       isValidFamilyMessage(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidFamilyMessage(incoming()) &&
+                       isValidId(messageId) &&
+                       existing().authorUid == request.auth.uid &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['text', 'authorName', 'authorEmoji', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(messageId) && existing().authorUid == request.auth.uid;
+    }
+
+    // Collection 4: /goals/{goalId}
+    match /goals/{goalId} {
+      allow get: if isSignedIn() && isValidId(goalId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(goalId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'name', 'iconEmoji', 'targetAmount', 'savedAmount', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'name', 'iconEmoji', 'targetAmount', 'savedAmount', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidFamilyGoal(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidFamilyGoal(incoming()) &&
+                       isValidId(goalId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'iconEmoji', 'targetAmount', 'savedAmount', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(goalId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 5: /shopping_items/{itemId}
+    match /shopping_items/{itemId} {
+      allow get: if isSignedIn() && isValidId(itemId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(itemId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'name', 'quantityNote', 'completed', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'name', 'quantityNote', 'completed', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidShoppingItem(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidShoppingItem(incoming()) &&
+                       isValidId(itemId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'quantityNote', 'completed', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(itemId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 6: /birthdays/{birthdayId}
+    match /birthdays/{birthdayId} {
+      allow get: if isSignedIn() && isValidId(birthdayId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(birthdayId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'personName', 'day', 'monthName', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'personName', 'day', 'monthName', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidBirthdayItem(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidBirthdayItem(incoming()) &&
+                       isValidId(birthdayId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['personName', 'day', 'monthName', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(birthdayId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 7: /contacts/{contactId}
+    match /contacts/{contactId} {
+      allow get: if isSignedIn() && isValidId(contactId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(contactId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'name', 'phoneNumber', 'category', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'name', 'phoneNumber', 'category', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidUsefulContact(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidUsefulContact(incoming()) &&
+                       isValidId(contactId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phoneNumber', 'category', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(contactId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 8: /photos/{photoId}
+    match /photos/{photoId} {
+      allow get: if isSignedIn() && isValidId(photoId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(photoId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'caption', 'imageBase64', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'caption', 'imageBase64', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidFamilyPhoto(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidFamilyPhoto(incoming()) &&
+                       isValidId(photoId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['caption', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(photoId) && existing().familyId == 'familia_principal';
+    }
+
+    // Collection 9: /documents/{docId}
+    match /documents/{docId} {
+      allow get: if isSignedIn() && isValidId(docId) && existing().familyId == 'familia_principal';
+      allow list: if isSignedIn() && existing().familyId == 'familia_principal';
+
+      allow create: if isSignedIn() &&
+                       isValidId(docId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll(['familyId', 'title', 'notesOrUrl', 'fileName', 'fileSummary', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['familyId', 'title', 'notesOrUrl', 'fileName', 'fileSummary', 'authorUid', 'authorName', 'createdAt', 'updatedAt']) &&
+                       isValidFamilyDocument(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidFamilyDocument(incoming()) &&
+                       isValidId(docId) &&
+                       existing().familyId == 'familia_principal' &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().familyId == existing().familyId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'notesOrUrl', 'fileName', 'fileSummary', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(docId) && existing().familyId == 'familia_principal';
+    }
+  }
+}

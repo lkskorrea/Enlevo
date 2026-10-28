@@ -1,0 +1,6 @@
+{
+  "name": "App Família",
+  "description": "Central de organização e conexão familiar com calendário, mural de mensagens, metas financeiras, lista de compras, aniversários, telefones úteis, fotos e documentos sincronizados em tempo real.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

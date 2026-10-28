@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">App Família</string>
+    <string name="welcome_title">Bem-vindo ao App Família!</string>
+    <string name="welcome_subtitle">Conecte-se com segurança usando sua conta Google para sincronizar calendário, mural, metas e listas da família em tempo real.</string>
+    <string name="sign_in_google">Entrar com o Google</string>
+    <string name="profile_setup_title">Seu Perfil na Família</string>
+    <string name="profile_setup_subtitle">Como você gostaria de ser chamado(a) pelos seus familiares?</string>
+    <string name="profile_name_label">Seu nome ou apelido (ex: Mãe, Pai, Lucas)</string>
+    <string name="save_profile_button">Entrar no Espaço da Família</string>
+    <string name="sign_out">Sair da conta</string>
+    <string name="edit_profile">Editar perfil</string>
+</resources>
